@@ -73,7 +73,7 @@ def get_latest_transformer_data(request):
         'transformer_data': serializer.data,
         'transformer_location_data': location_data.data
     })    
-        
+@csrf_exempt      
 def register(request):
     if request.method == 'POST':
         request_data = request.POST
