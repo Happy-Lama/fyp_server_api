@@ -147,12 +147,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = ['https://fyp-dashboard.onrender.com']
 # CSRF_COOKIE_DOMAIN = 'http://localhost:8000'
 
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',
-#     # Add other allowed origins if needed
-# ]
+CORS_ALLOWED_ORIGINS = [
+    # 'http://localhost:3000',
+    'http://fyp-dashboard.onrender.com',
+    'https://fyp-dashboard.onrender.com',
+    # Add other allowed origins if needed
+]
 
 CORS_ORIGIN_WHITELIST = [
+    'http://fyp-dashboard.onrender.com',
     'https://fyp-dashboard.onrender.com',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
