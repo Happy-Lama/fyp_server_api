@@ -22,11 +22,11 @@ def login(request):
         # print(request.POST)
     
         user_exists = User.objects.get(email=email)
-        # print(user_exists)
+        print(user_exists)
 
         # Authenticate user
         user = authenticate(request, username=user_exists, password=password)
-        # print(user)        
+        print(user)        
         if user is not None:
             # Log in the user
             auth_login(request, user)
