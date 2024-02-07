@@ -13,7 +13,7 @@ def index(request):
 def get_csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({ 'csrfToken': csrf_token})
-
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
