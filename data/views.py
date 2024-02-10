@@ -44,7 +44,8 @@ def index(request):
             return JsonResponse({'message': 'Unregistered Transformer'}, status=400)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-
+        finally:
+            print(request.POST)
     return JsonResponse({'error': 'Unsupported method'}, status=405)
 
 
