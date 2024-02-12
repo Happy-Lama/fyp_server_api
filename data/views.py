@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db.models import Avg, Max
 from dashboard.models import Notifications
 from . import threshold_checks
-from corsheaders.decorators import cors_headers
+# from corsheaders.decorators import cors_headers
 
 
 @csrf_exempt
@@ -102,7 +102,7 @@ def register(request):
     else:
         return JsonResponse({'message': 'Method Not Allowed'}, status=405)
 
-@cors_headers()
+# @cors_headers()
 def get_average_values(request):
     transformer_location_data = TransformerLocationData.objects.all()
     
