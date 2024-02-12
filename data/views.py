@@ -103,51 +103,110 @@ def register(request):
         return JsonResponse({'message': 'Method Not Allowed'}, status=405)
 
 # @cors_headers()
-def get_average_values(request):
-    transformer_location_data = TransformerLocationData.objects.all()
+# def get_average_values(request):
+#     transformer_location_data = TransformerLocationData.objects.all()
     
-    # get only transformer data for the registered ones
-    transformer_data = TransformerData.objects.filter(devUID__in=transformer_location_data.values('devUID'))
+#     # get only transformer data for the registered ones
+#     transformer_data = TransformerData.objects.filter(devUID__in=transformer_location_data.values('devUID'))
      
-    # average values of the transformer parameters
-    average_values = TransformerDataSerializer().get_average_values(transformer_data)
+#     # average values of the transformer parameters
+#     average_values = TransformerDataSerializer().get_average_values(transformer_data)
     
-    # moving average values for the transformer parameters
-    # Calculate moving average over the last 24 hours with a window of 15 minutes
-    twenty_four_hours_ago = timezone.now() - timezone.timedelta(hours=24*7)
-    moving_average_queryset = TransformerData.objects.filter(timestamp__gte=twenty_four_hours_ago, devUID__in=transformer_location_data.values('devUID'))
+#     # moving average values for the transformer parameters
+#     # Calculate moving average over the last 24 hours with a window of 15 minutes
+#     twenty_four_hours_ago = timezone.now() - timezone.timedelta(hours=24*7)
+#     moving_average_queryset = TransformerData.objects.filter(timestamp__gte=twenty_four_hours_ago, devUID__in=transformer_location_data.values('devUID'))
 
             
-    # Calculate moving average with a window of 15 minutes
+#     # Calculate moving average with a window of 15 minutes
+#     moving_average_values = []
+#     fifteen_minutes_delta = timezone.timedelta(minutes=15)
+#     current_timestamp = twenty_four_hours_ago
+
+#     while current_timestamp <= timezone.now():
+#         # Filter data within the current 15-minute window
+#         window_start = current_timestamp - fifteen_minutes_delta
+#         window_end = current_timestamp
+#         window_data = moving_average_queryset.filter(timestamp__gte=window_start, timestamp__lt=window_end)
+
+#         # Calculate average values for the current window
+#         if window_data.exists():
+#             window_average_values = window_data.aggregate(
+#                 Avg('output_current'),
+#                 Avg('output_voltage'),
+#                 Avg('output_power'),
+#                 Avg('output_reactive_power'),
+#                 Avg('output_frequency'),
+#                 Avg('current_loading_percentage')
+#             )
+#             moving_average_values.append({
+#                 'timestamp': current_timestamp,
+#                 'average_values': window_average_values,
+#             })
+
+#         # Move to the next 15-minute window
+#         current_timestamp += fifteen_minutes_delta
+#     return JsonResponse({
+#         'average_values': average_values,
+#         'moving_average_values': moving_average_values,
+#         })
+
+# from django.db.models import Avg
+
+def get_average_values(request):
+    transformer_location_data = TransformerLocationData.objects.all()
+
+    # Get only transformer data for the registered ones
+    transformer_data = TransformerData.objects.filter(
+        devUID__in=transformer_location_data.values('devUID')
+    )
+
+    # Average values of the transformer parameters
+    average_values = transformer_data.aggregate(
+        Avg('output_current'),
+        Avg('output_voltage'),
+        Avg('output_power'),
+        Avg('output_reactive_power'),
+        Avg('output_frequency'),
+        Avg('current_loading_percentage')
+    )
+
+    # Calculate moving average values for the transformer parameters
+    twenty_four_hours_ago = timezone.now() - timezone.timedelta(hours=24)
+    moving_average_queryset = TransformerData.objects.filter(
+        timestamp__gte=twenty_four_hours_ago,
+        devUID__in=transformer_location_data.values('devUID')
+    )
+
     moving_average_values = []
     fifteen_minutes_delta = timezone.timedelta(minutes=15)
     current_timestamp = twenty_four_hours_ago
 
     while current_timestamp <= timezone.now():
-        # Filter data within the current 15-minute window
         window_start = current_timestamp - fifteen_minutes_delta
         window_end = current_timestamp
-        window_data = moving_average_queryset.filter(timestamp__gte=window_start, timestamp__lt=window_end)
 
-        # Calculate average values for the current window
-        if window_data.exists():
-            window_average_values = window_data.aggregate(
-                Avg('output_current'),
-                Avg('output_voltage'),
-                Avg('output_power'),
-                Avg('output_reactive_power'),
-                Avg('output_frequency'),
-                Avg('current_loading_percentage')
-            )
-            moving_average_values.append({
-                'timestamp': current_timestamp,
-                'average_values': window_average_values,
-            })
+        window_data = moving_average_queryset.filter(
+            timestamp__range=(window_start, window_end)
+        ).aggregate(
+            Avg('output_current'),
+            Avg('output_voltage'),
+            Avg('output_power'),
+            Avg('output_reactive_power'),
+            Avg('output_frequency'),
+            Avg('current_loading_percentage')
+        )
 
-        # Move to the next 15-minute window
+        moving_average_values.append({
+            'timestamp': current_timestamp,
+            'average_values': window_data
+        })
+
         current_timestamp += fifteen_minutes_delta
+
     return JsonResponse({
         'average_values': average_values,
         'moving_average_values': moving_average_values,
-        })
+    })
+
 
