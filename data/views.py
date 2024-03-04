@@ -15,10 +15,10 @@ def index(request):
     if request.method == 'POST':
         try:
             # Extract JSON data from the request
-            print(request.POST)
+            print("request.POST",request.POST)
             
             data = json.loads(request.body.decode('utf-8'))
-            print(data)
+            print("Decoded Data", data)
             received_data = data.get('data', {})
             print("Received Data:", received_data)
             
